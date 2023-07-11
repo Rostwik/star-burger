@@ -136,3 +136,25 @@ class Order(models.Model):
 
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.id}'
+
+
+class OrderItems(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        verbose_name='Товар',
+        related_name='products'
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        verbose_name='Заказ',
+        related_name='orders'
+    )
+    quantity = models.IntegerField(
+        'Количество',
+        validators=[MinValueValidator(1)]
+    )
+
+    def __str__(self):
+        return f'{self.product}'
