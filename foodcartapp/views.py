@@ -88,12 +88,14 @@ def register_order(request):
         address=validated_order['address']
     )
 
-    for product in validated_order['products']:
-        OrderItems.objects.create(
-            order=order,
+    order_items = [
+        OrderItems(
             product=product['product'],
-            quantity=product['quantity']
-        )
+            order=order,
+            quantity=product['quantity'])
+        for product in validated_order['products']
+    ]
+    OrderItems.objects.bulk_create(order_items)
 
     serializer = OrderSerializer(order, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)

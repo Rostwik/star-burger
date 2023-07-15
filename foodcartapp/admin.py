@@ -25,6 +25,17 @@ class OrderAdmin(admin.ModelAdmin):
         OrderItemsInline,
     ]
 
+    def save_formset(self, request, form, formset, change):
+        order_items = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+
+        for item in order_items:
+            if not item.price:
+                product = Product.objects.get(id=item.product.id)
+                item.price = product.price
+                item.save()
+
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
