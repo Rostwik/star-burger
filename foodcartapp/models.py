@@ -140,6 +140,19 @@ class Order(models.Model):
 
     objects = OrderQuerySet.as_manager()
 
+    STATUSES = [
+        ('н', 'Необработанный'),
+        ('г', 'В работе'),
+        ('д', 'В доставке'),
+        ('з', 'Завершен')
+    ]
+    status = models.CharField(
+        max_length=10,
+        default='н',
+        choices=STATUSES,
+        db_index=True
+    )
+
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
