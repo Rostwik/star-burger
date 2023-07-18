@@ -133,25 +133,21 @@ class OrderQuerySet(models.QuerySet):
 
 
 class Order(models.Model):
-    firstname = models.CharField('Имя', max_length=50)
-    lastname = models.CharField('Фамилия', max_length=50)
-    phonenumber = PhoneNumberField('Номер телефона', db_index=True)
-    address = models.CharField('Адрес', max_length=100)
-
-    objects = OrderQuerySet.as_manager()
-
     STATUSES = [
         ('н', 'Необработанный'),
         ('г', 'В работе'),
         ('д', 'В доставке'),
         ('з', 'Завершен')
     ]
-    status = models.CharField(
-        max_length=10,
-        default='н',
-        choices=STATUSES,
-        db_index=True
-    )
+
+    firstname = models.CharField('Имя', max_length=50)
+    lastname = models.CharField('Фамилия', max_length=50)
+    phonenumber = PhoneNumberField('Номер телефона', db_index=True)
+    address = models.CharField('Адрес', max_length=100)
+    status = models.CharField('Статус', max_length=10, default='н', choices=STATUSES, db_index=True)
+    comment = models.TextField('Комментарий', max_length=300, blank=True)
+
+    objects = OrderQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Заказ'
