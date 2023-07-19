@@ -154,12 +154,14 @@ class Order(models.Model):
     registrated_at = models.DateTimeField('Дата оформления заказа', default=timezone.now, db_index=True)
     called_at = models.DateTimeField('Дата звонка', blank=True, null=True, db_index=True)
     delivered_at = models.DateTimeField('Дата доставки', blank=True, null=True, db_index=True)
-    payment_type = models.CharField(
-        'Способ оплаты',
-        max_length=20,
-        choices=PAYMENTS,
+    payment_type = models.CharField('Способ оплаты', max_length=20, choices=PAYMENTS, blank=True, db_index=True)
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        verbose_name='Ресторан исполнитель',
+        related_name='orders',
         blank=True,
-        db_index=True
+        null=True
     )
 
     objects = OrderQuerySet.as_manager()

@@ -22,7 +22,7 @@ class OrderItemsInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'firstname', 'lastname', 'phonenumber', 'address')
+    list_display = ('id', 'firstname', 'lastname', 'phonenumber', 'address', 'restaurant')
     inlines = [
         OrderItemsInline,
     ]
@@ -31,7 +31,6 @@ class OrderAdmin(admin.ModelAdmin):
         order_items = formset.save(commit=False)
         for obj in formset.deleted_objects:
             obj.delete()
-
         for item in order_items:
             if not item.price:
                 product = Product.objects.get(id=item.product.id)
