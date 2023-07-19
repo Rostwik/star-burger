@@ -140,6 +140,10 @@ class Order(models.Model):
         ('д', 'В доставке'),
         ('з', 'Завершен')
     ]
+    PAYMENTS = [
+        ('нал', 'Наличностью'),
+        ('безнал', 'Электронно')
+    ]
 
     firstname = models.CharField('Имя', max_length=50)
     lastname = models.CharField('Фамилия', max_length=50)
@@ -150,6 +154,13 @@ class Order(models.Model):
     registrated_at = models.DateTimeField('Дата оформления заказа', default=timezone.now, db_index=True)
     called_at = models.DateTimeField('Дата звонка', blank=True, null=True, db_index=True)
     delivered_at = models.DateTimeField('Дата доставки', blank=True, null=True, db_index=True)
+    payment_type = models.CharField(
+        'Способ оплаты',
+        max_length=20,
+        choices=PAYMENTS,
+        blank=True,
+        db_index=True
+    )
 
     objects = OrderQuerySet.as_manager()
 
