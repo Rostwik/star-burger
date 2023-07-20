@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 from django import forms
 from django.shortcuts import redirect, render
 from django.views import View
@@ -6,8 +8,12 @@ from django.contrib.auth.decorators import user_passes_test
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from geopy import distance
 
 from foodcartapp.models import Product, Restaurant, Order
+from restaurateur.geolocation_tools import fetch_coordinates
+from star_burger.settings import YANDEX_API
 
 
 class Login(forms.Form):
@@ -91,20 +97,27 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    restaurants = list(Restaurant.objects.all())
+    restaurants = Restaurant.objects.prefetch_related('menu_items')
     restaurants_menus = {}
     for restaurant in restaurants:
-        restaurant_menu = [dish.product for dish in list(restaurant.menu_items.all())]
+        restaurant_menu = [dish.product for dish in restaurant.menu_items.all()]
         restaurants_menus[restaurant] = restaurant_menu
 
     orders = list(Order.objects.exclude(status__in=['з']).calculate_order_sum())
+
     for order in orders:
+        customer_coordinates = fetch_coordinates(YANDEX_API, order.address)
         relevant_restaurants = []
         order_items = [item.product for item in order.order_items.all()]
         for restaurant, menu in restaurants_menus.items():
             if set(order_items) <= set(menu):
-                relevant_restaurants.append(restaurant)
-        order.relevant_restaurants = relevant_restaurants
+                restaurant_coordinates = fetch_coordinates(YANDEX_API, restaurant.address)
+                if restaurant_coordinates and customer_coordinates:
+                    restaurant_distance = distance.distance(restaurant_coordinates, customer_coordinates).km
+                    relevant_restaurants.append((restaurant, restaurant_distance))
+                else:
+                    relevant_restaurants.append((restaurant, 'ошибка определения координат'))
+        order.relevant_restaurants = sorted(relevant_restaurants, key=itemgetter(1))
 
     return render(request, template_name='orders.html', context={
         "orders": orders

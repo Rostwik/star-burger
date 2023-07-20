@@ -40,7 +40,7 @@
             <details>
               <summary><b>Доступные рестораны</b></summary>
               {% for restaurant in order.relevant_restaurants %}
-                {{restaurant}}
+                {{restaurant.0}} расстояние: {{restaurant.1}}<br>
               {% endfor %}
             </details>
           {% endif %}
