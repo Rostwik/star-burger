@@ -107,9 +107,6 @@ def view_orders(request):
     orders = list(Order.objects.exclude(status__in=['з']).calculate_order_sum())
 
     for order in orders:
-        print(order.address)
-        print(order.location.address)
-
         if order.address != order.location.address:
             location, is_created = Location.objects.get_or_create(address=order.address)
             if is_created:
