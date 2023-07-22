@@ -1,6 +1,7 @@
 from operator import itemgetter
 
 from django import forms
+from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
@@ -8,11 +9,11 @@ from django.contrib.auth.decorators import user_passes_test
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
-from django.conf import settings
 from geopy import distance
 
 from foodcartapp.models import Product, Restaurant, Order
-from restaurateur.geolocation_tools import fetch_coordinates
+from geotools.geolocation_tools import fetch_coordinates
+from geotools.models import Location
 from star_burger.settings import YANDEX_API
 
 
@@ -106,12 +107,30 @@ def view_orders(request):
     orders = list(Order.objects.exclude(status__in=['з']).calculate_order_sum())
 
     for order in orders:
-        customer_coordinates = fetch_coordinates(YANDEX_API, order.address)
+        print(order.address)
+        print(order.location.address)
+
+        if order.address != order.location.address:
+            location, is_created = Location.objects.get_or_create(address=order.address)
+            if is_created:
+                customer_coordinates = fetch_coordinates(
+                    settings.YANDEX_API,
+                    order.address
+                )
+                if customer_coordinates:
+                    location.long, location.lat = customer_coordinates
+                    location.save()
+                    order.location = location
+                    order.save()
+                else:
+                    location.long, location.lat = None, None
+                    location.save()
+        customer_coordinates = order.location.lat, order.location.long
         relevant_restaurants = []
         order_items = [item.product for item in order.order_items.all()]
         for restaurant, menu in restaurants_menus.items():
             if set(order_items) <= set(menu):
-                restaurant_coordinates = fetch_coordinates(YANDEX_API, restaurant.address)
+                restaurant_coordinates = restaurant.location.lat, restaurant.location.long
                 if restaurant_coordinates and customer_coordinates:
                     restaurant_distance = distance.distance(restaurant_coordinates, customer_coordinates).km
                     relevant_restaurants.append((restaurant, restaurant_distance))

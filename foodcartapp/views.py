@@ -1,7 +1,10 @@
+from django.conf import settings
 from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
 
+from geotools.geolocation_tools import fetch_coordinates
+from geotools.models import Location
 from .models import Product, Order, OrderItems
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -81,13 +84,25 @@ def register_order(request):
     serializer.is_valid(raise_exception=True)
     validated_order = serializer.validated_data
 
-    print(validated_order)
+    location, is_created = Location.objects.get_or_create(address=validated_order['address'])
+    if is_created:
+        customer_coordinates = fetch_coordinates(
+            settings.YANDEX_API,
+            validated_order['address']
+        )
+        if customer_coordinates:
+            location.long, location.lat = customer_coordinates
+            location.save()
+        else:
+            location.long, location.lat = None, None
+            location.save()
 
     order = Order.objects.create(
         firstname=validated_order['firstname'],
         lastname=validated_order['lastname'],
         phonenumber=validated_order['phonenumber'],
-        address=validated_order['address']
+        address=validated_order['address'],
+        location=location
     )
 
     order_items = [
@@ -102,5 +117,5 @@ def register_order(request):
     serializer = OrderSerializer(order, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)
     serializer.save()
-    print(serializer.data)
+
     return Response(serializer.data)

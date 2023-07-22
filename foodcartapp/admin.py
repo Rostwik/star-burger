@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
@@ -28,13 +30,16 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
     def save_formset(self, request, form, formset, change):
+        logger = logging.getLogger(__name__)
+
         order_items = formset.save(commit=False)
-        for obj in formset.deleted_objects:
-            obj.delete()
+        logger.debug(order_items)
         for item in order_items:
-            if not item.price:
+            if item.price == 0.00:
                 product = Product.objects.get(id=item.product.id)
                 item.price = product.price
+                item.save()
+            else:
                 item.save()
 
     def response_post_save_change(self, request, obj):
