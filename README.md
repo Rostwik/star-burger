@@ -58,7 +58,7 @@ pip install -r requirements.txt
 ```sh
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 ```
-Определите переменную окружения `YANDEX_API` в файле .env,
+Определите переменную окружения `YANDEX_API` в файле .env -
 этот токен необходим для использования инструментов определения геолокации реализованы на базе сервисов Яндекса
 [Вы можете подключить их здесь](https://developer.tech.yandex.ru/services)
 
