@@ -31,6 +31,7 @@ class OrderSerializer(ModelSerializer):
                 location.long, location.lat = None, None
                 location.save()
 
+        validated_data['location'] = location
         order = Order.objects.create(**validated_data)
 
         order_items = [
