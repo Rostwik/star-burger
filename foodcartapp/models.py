@@ -146,26 +146,27 @@ class OrderQuerySet(models.QuerySet):
 
 class Order(models.Model):
     STATUSES = [
-        ('н', 'Необработанный'),
-        ('г', 'В работе'),
-        ('д', 'В доставке'),
-        ('з', 'Завершен')
+        ('n', 'Необработанный'),
+        ('w', 'В работе'),
+        ('d', 'В доставке'),
+        ('c', 'Завершен')
     ]
     PAYMENTS = [
-        ('нал', 'Наличностью'),
-        ('безнал', 'Электронно')
+        ('unspecified', 'Не указано'),
+        ('cash', 'Наличностью'),
+        ('cashless', 'Электронно')
     ]
 
     firstname = models.CharField('Имя', max_length=50)
     lastname = models.CharField('Фамилия', max_length=50)
     phonenumber = PhoneNumberField('Номер телефона', db_index=True)
     address = models.CharField('Адрес', max_length=100)
-    status = models.CharField('Статус', max_length=10, default='н', choices=STATUSES, db_index=True)
+    status = models.CharField('Статус', max_length=10, default='n', choices=STATUSES, db_index=True)
     comment = models.TextField('Комментарий', max_length=300, blank=True)
-    registrated_at = models.DateTimeField('Дата оформления заказа', default=timezone.now, db_index=True)
+    registered_at = models.DateTimeField('Дата оформления заказа', default=timezone.now, db_index=True)
     called_at = models.DateTimeField('Дата звонка', blank=True, null=True, db_index=True)
     delivered_at = models.DateTimeField('Дата доставки', blank=True, null=True, db_index=True)
-    payment_type = models.CharField('Способ оплаты', max_length=20, choices=PAYMENTS, blank=True, db_index=True)
+    payment_type = models.CharField('Способ оплаты', max_length=20, default='unspecified', choices=PAYMENTS, db_index=True)
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.CASCADE,
@@ -214,8 +215,7 @@ class OrderItems(models.Model):
         max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        default=0
     )
 
     def __str__(self):
-        return f'{self.product}'
+        return self.product

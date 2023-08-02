@@ -26,3 +26,6 @@ def fetch_coordinates(apikey, address):
 
     except requests.JSONDecodeError:
         return None
+
+    except KeyError:
+        return None
