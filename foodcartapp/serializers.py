@@ -26,10 +26,10 @@ class OrderSerializer(ModelSerializer):
             )
             if customer_coordinates:
                 location.long, location.lat = customer_coordinates
-                location.save()
             else:
                 location.long, location.lat = None, None
-                location.save()
+
+            location.save()
 
         validated_data['location'] = location
         order = Order.objects.create(**validated_data)
