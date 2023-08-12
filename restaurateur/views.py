@@ -2,6 +2,7 @@ from operator import itemgetter
 
 from django import forms
 from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
@@ -98,6 +99,9 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
+    a = None
+    a.hello() # Creating an error with an invalid line of code
+    return HttpResponse("Hello, world. You're at the pollapp index.")
     restaurants = Restaurant.objects.prefetch_related('menu_items')
     restaurants_menus = {}
     for restaurant in restaurants:
