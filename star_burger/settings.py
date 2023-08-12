@@ -16,7 +16,7 @@ YANDEX_API = env('YANDEX_API')
 ROLLBAR_ACCESS_TOKEN = env('ROLLBAR_ACCESS_TOKEN')
 ROLLBAR_ENVIRONMENT = env('ROLLBAR_ENVIRONMENT', default='production')
 DEBUG = env.bool('DEBUG', True)
-
+DATABASE_URL = env('DATABASE_URL')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
 INSTALLED_APPS = [
@@ -95,8 +95,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
+    'default': dj_database_url.parse(
+        DATABASE_URL
     )
 }
 
