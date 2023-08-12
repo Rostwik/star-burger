@@ -99,9 +99,6 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    a = None
-    a.hello() # Creating an error with an invalid line of code
-    return HttpResponse("Hello, world. You're at the pollapp index.")
     restaurants = Restaurant.objects.prefetch_related('menu_items')
     restaurants_menus = {}
     for restaurant in restaurants:

@@ -1,7 +1,6 @@
 import os
 
 import dj_database_url
-import rollbar
 from environs import Env
 
 
@@ -15,6 +14,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 SECRET_KEY = env('SECRET_KEY')
 YANDEX_API = env('YANDEX_API')
 ROLLBAR_ACCESS_TOKEN = env('ROLLBAR_ACCESS_TOKEN')
+ROLLBAR_ENVIRONMENT = env('ROLLBAR_ENVIRONMENT', default='production')
 DEBUG = env.bool('DEBUG', True)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
@@ -49,7 +49,7 @@ MIDDLEWARE = [
 
 ROLLBAR = {
     'access_token': ROLLBAR_ACCESS_TOKEN,
-    'environment': env('ROLLBAR_ENVIRONMENT', default='production'),
+    'environment': ROLLBAR_ENVIRONMENT,
     'code_version': '1.0',
     'root': BASE_DIR,
 }
