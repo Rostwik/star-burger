@@ -218,4 +218,4 @@ class OrderItems(models.Model):
     )
 
     def __str__(self):
-        return self.product
+        return self.product.name
