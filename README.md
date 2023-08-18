@@ -142,11 +142,50 @@ Parcel будет следить за файлами в каталоге `bundle
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
 
-Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
+Настроить бэкенд: создать файл `.env` в корне проекта со следующими настройками:
 
 - `DEBUG` — дебаг-режим. Поставьте `False`.
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
+- `YANDEX_API` - ключ для API Yandex [Инструкция для получения](https://yandex.ru/dev/site/api/concepts/access.html)
+- `ROLLBAR_ACCESS_TOKEN` - токен для Rollbar [Инструкция для получения](https://rollbar.com/)
+- `ROLLBAR_ENVIRONMENT` - имя профиля Rollbar
+- `DATABASE_URL` - url для подключения к БД, пример: "postgres://USER:PASSWORD@HOST:PORT/NAME"
+
+## Автоматическое обновление кода на сервере
+
+- Создать bush - скрипт:
+
+```sh
+nano autodeploy.sh
+```
+- Поместить следующий код:
+
+```sh
+#!/bin/bash
+
+set -e
+cd /opt/star-burger
+source burger/bin/activate
+git pull
+pip install -r requirements.txt
+npm ci --include=dev
+python3 manage.py collectstatic --noinput
+python3 manage.py migrate --noinput
+systemctl daemon-reload
+curl -H "X-Rollbar-Access-Token: $(cat .env | grep ROLLBAR_ACCESS_TOKEN| cut -d "=" -f 2)" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d '{"environment": "development", "revision": "'"$(git rev-parse HEAD)"'", "rollbar_name": "your_rollbar_name", "local_username": "your_rollbar_name", "status": "succeeded"}'
+echo "Деплой завершен"
+```
+- Запустить скрипт:
+
+```sh
+./autodeploy.sh
+```
+
+## Рабочая версия сайта
+
+- [Burgerito](https://starburgerito.ru/)
+
 
 ## Цели проекта
 
