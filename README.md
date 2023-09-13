@@ -154,32 +154,13 @@ Parcel будет следить за файлами в каталоге `bundle
 
 ## Автоматическое обновление кода на сервере
 
-- Создать bush - скрипт:
+В репозитории находится скрипт, облегчающий деплой, после каждого изменения в коде.
+Скрипт называется deploy_star_burger.sh
 
-```sh
-nano autodeploy.sh
-```
-- Поместить следующий код:
-
-```sh
-#!/bin/bash
-
-set -e
-cd /opt/star-burger
-source burger/bin/activate
-git pull
-pip install -r requirements.txt
-npm ci --include=dev
-python3 manage.py collectstatic --noinput
-python3 manage.py migrate --noinput
-systemctl daemon-reload
-curl -H "X-Rollbar-Access-Token: $(cat .env | grep ROLLBAR_ACCESS_TOKEN| cut -d "=" -f 2)" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d '{"environment": "development", "revision": "'"$(git rev-parse HEAD)"'", "rollbar_name": "your_rollbar_name", "local_username": "your_rollbar_name", "status": "succeeded"}'
-echo "Деплой завершен"
-```
 - Запустить скрипт:
 
 ```sh
-./autodeploy.sh
+./deploy_star_burger.sh
 ```
 
 ## Рабочая версия сайта
